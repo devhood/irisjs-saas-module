@@ -1,7 +1,7 @@
 
 var GitFactory = require("./irisjsSaas-factory");
 
-iris.modules.irisjsSaas.registerHook("hook_entity_updated", 2, function (thisHook, data) {
+iris.modules.irisjsSaas.registerHook("hook_entity_updated", 0, function (thisHook, data) {
   
   if(data && data.githubaccesstoken){
     
@@ -21,7 +21,7 @@ iris.modules.irisjsSaas.registerHook("hook_entity_updated", 2, function (thisHoo
           var Git = new GitFactory("github");
           var git = new Git({token:data.githubaccesstoken});
 
-          git.createRepository({name:"saas-iris"},function(err,result){
+          git.createRepository({name:"saas-iris",gitignore_template:"Node",auto_init:true},function(err,result){
             
             if(err){
               
@@ -35,19 +35,35 @@ iris.modules.irisjsSaas.registerHook("hook_entity_updated", 2, function (thisHoo
                 "entityType": "user",
                 "eid": data.eid,
                 "repositoryurl" : result.clone_url,
-                "workspace" : iris.sitePath  + '/' +result.full_name + '/' + "current"
+                "workspace" : iris.sitePath  + '/' +result.full_name + '/' + "current",
               };
+              
+              if(data.git && data.git.length){
+                userEntity.git = data.git;
+                userEntity.git[0].gitpath = userEntity.workspace;
+              }
+              else{
+                userEntity.git = [];
+                userEntity.git.push({
+                  gitpath : userEntity.workspace
+                });
+              }
               iris.invokeHook("hook_entity_edit", "root", null, userEntity);
               
               var cloneinfo = {
                 "repositoryurl" : userEntity.repositoryurl,
                 "workspace" : userEntity.workspace,
-                "githubaccesstoken" : data.githubaccesstoken
+                "githubaccesstoken" : data.githubaccesstoken,
               };
               
-              git.cloneRepository(cloneinfo,function(err,result){
-                console.log(err,result);
-                thisHook.pass(data);    
+              git.cloneRepository(cloneinfo,function(err,repo){
+                if(err){
+                  thisHook.pass(err);   
+                }
+                else{
+                  thisHook.pass(data);    
+                }
+                
               });
               
             }
