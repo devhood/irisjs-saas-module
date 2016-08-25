@@ -25,6 +25,17 @@ github.prototype.createRepository = function(parameters,cb){
   }
     
   client.repos.create(parameters,cb);
+
+};
+
+github.prototype.cloneTemplateRepository = function(parameters,cb){
+    
+  if (parameters === undefined) {
+        parameters = {};
+  }
+    
+  client.repos.fork(parameters,cb);
+
 };
 
 module.exports = github;

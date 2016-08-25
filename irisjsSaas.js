@@ -21,8 +21,7 @@ iris.modules.irisjsSaas.registerHook("hook_entity_updated", 0, function (thisHoo
           var Git = new GitFactory("github");
           var git = new Git({token:data.githubaccesstoken});
 
-          git.createRepository({name:"saas-iris",gitignore_template:"Node",auto_init:true},function(err,result){
-            
+          git.cloneTemplateRepository({user:'devhood',repo:'iris-saas-template'},function(err,result){
             if(err){
               
               iris.log("error", err);
@@ -68,6 +67,7 @@ iris.modules.irisjsSaas.registerHook("hook_entity_updated", 0, function (thisHoo
               
             }
           });
+
         }
         else{
           
